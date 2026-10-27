@@ -9,41 +9,41 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- BASE DE DATOS DE RECETAS (DATO POR PLATO) ---
+# --- BASE DE DATOS INICIAL DE RECETAS ---
 RECETAS_DB = {
     "SOPA DE MOTE": {
         "rendimiento_platos": 70,
         "insumos": [
-            {"nombre": "Mote seco", "cantidad_g": 5000, "costo_total": 30.00},  # 5 kg x S/ 6.00
-            {"nombre": "Mondongo", "cantidad_g": 1500, "costo_total": 21.00},  # 1.5 kg x S/ 14.00
-            {"nombre": "Piltrafa", "cantidad_g": 1500, "costo_total": 22.50},  # 1.5 kg x S/ 15.00
-            {"nombre": "Huesos de manzana", "cantidad_g": 4000, "costo_total": 12.00},  # 4 kg x S/ 3.00
-            {"nombre": "Pata de vaca", "cantidad_g": 1000, "costo_total": 22.00},  # 1 kg x S/ 22.00
-            {"nombre": "Arroz", "cantidad_g": 300, "costo_total": 1.50},  # Estimado
-            {"nombre": "Cebolla (1 un)", "cantidad_g": 200, "costo_total": 2.00},
-            {"nombre": "Ajo (1 un)", "cantidad_g": 50, "costo_total": 1.00},
-            {"nombre": "Perejil", "cantidad_g": 100, "costo_total": 2.00},
-            {"nombre": "Orégano", "cantidad_g": 50, "costo_total": 2.00},
-            {"nombre": "Hierbabuena", "cantidad_g": 100, "costo_total": 2.00},
-            {"nombre": "Limón", "cantidad_g": 500, "costo_total": 2.00},
-            {"nombre": "Rocoto", "cantidad_g": 500, "costo_total": 3.50},
-            {"nombre": "Sal", "cantidad_g": 500, "costo_total": 2.00},
-            {"nombre": "Platos descartables (2 pqt)", "cantidad_g": 0, "costo_total": 8.00},  # 2 pqt x S/ 4.00
-            {"nombre": "Servilletas", "cantidad_g": 0, "costo_total": 2.00},
-            {"nombre": "Cucharas descartables (2 pqt)", "cantidad_g": 0, "costo_total": 8.00}  # 2 pqt x S/ 4.00
+            {"nombre": "Mote seco", "cantidad_g": 5000.0, "costo_total": 30.00},
+            {"nombre": "Mondongo", "cantidad_g": 1500.0, "costo_total": 21.00},
+            {"nombre": "Piltrafa", "cantidad_g": 1500.0, "costo_total": 22.50},
+            {"nombre": "Huesos de manzana", "cantidad_g": 4000.0, "costo_total": 12.00},
+            {"nombre": "Pata de vaca", "cantidad_g": 1000.0, "costo_total": 22.00},
+            {"nombre": "Arroz", "cantidad_g": 300.0, "costo_total": 1.50},
+            {"nombre": "Cebolla (1 un)", "cantidad_g": 200.0, "costo_total": 2.00},
+            {"nombre": "Ajo (1 un)", "cantidad_g": 50.0, "costo_total": 1.00},
+            {"nombre": "Perejil", "cantidad_g": 100.0, "costo_total": 2.00},
+            {"nombre": "Orégano", "cantidad_g": 50.0, "costo_total": 2.00},
+            {"nombre": "Hierbabuena", "cantidad_g": 100.0, "costo_total": 2.00},
+            {"nombre": "Limón", "cantidad_g": 500.0, "costo_total": 2.00},
+            {"nombre": "Rocoto", "cantidad_g": 500.0, "costo_total": 3.50},
+            {"nombre": "Sal", "cantidad_g": 500.0, "costo_total": 2.00},
+            {"nombre": "Platos descartables (2 pqt)", "cantidad_g": 0.0, "costo_total": 8.00},
+            {"nombre": "Servilletas", "cantidad_g": 0.0, "costo_total": 2.00},
+            {"nombre": "Cucharas descartables (2 pqt)", "cantidad_g": 0.0, "costo_total": 8.00}
         ]
     },
     "YUCA RELLENA": {
         "rendimiento_platos": 70,
         "insumos": [
-            {"nombre": "Yuca amarilla", "cantidad_g": 5000, "costo_total": 20.00},  # 5 kg x S/ 4.00
-            {"nombre": "Harina de chuño", "cantidad_g": 1000, "costo_total": 10.00},  # 1 kg x S/ 10.00
-            {"nombre": "Carne molida", "cantidad_g": 3000, "costo_total": 66.00},  # 3 kg x S/ 22.00
-            {"nombre": "Cebolla", "cantidad_g": 4000, "costo_total": 8.00},  # 4 kg x S/ 2.00
-            {"nombre": "Ají panca", "cantidad_g": 100, "costo_total": 2.50},
-            {"nombre": "Especias (Pimienta, Orégano, Comino)", "cantidad_g": 50, "costo_total": 2.00},
-            {"nombre": "Ajo", "cantidad_g": 100, "costo_total": 2.00},
-            {"nombre": "Huevo", "cantidad_g": 500, "costo_total": 4.00}
+            {"nombre": "Yuca amarilla", "cantidad_g": 5000.0, "costo_total": 20.00},
+            {"nombre": "Harina de chuño", "cantidad_g": 1000.0, "costo_total": 10.00},
+            {"nombre": "Carne molida", "cantidad_g": 3000.0, "costo_total": 66.00},
+            {"nombre": "Cebolla", "cantidad_g": 4000.0, "costo_total": 8.00},
+            {"nombre": "Ají panca", "cantidad_g": 100.0, "costo_total": 2.50},
+            {"nombre": "Especias (Pimienta, Orégano, Comino)", "cantidad_g": 50.0, "costo_total": 2.00},
+            {"nombre": "Ajo", "cantidad_g": 100.0, "costo_total": 2.00},
+            {"nombre": "Huevo", "cantidad_g": 500.0, "costo_total": 4.00}
         ]
     }
 }
@@ -51,13 +51,20 @@ RECETAS_DB = {
 st.title("🍲 Simulador de Punto de Equilibrio por Producto")
 st.subheader("Proyecto Ollas UNACEM")
 
-# --- SELECCIÓN DE PRODUCTO ---
+# --- SELECCIÓN DE PRODUCTO Y CONTROL EN SESSION STATE ---
 plato_seleccionado = st.selectbox(
     "📌 Selecciona el Plato a Evaluar:",
     options=list(RECETAS_DB.keys())
 )
 
-datos_plato = RECETAS_DB[plato_seleccionado]
+# Inicializar/Actualizar datos del plato activo en session_state para permitir edición interactiva
+key_plato = f"receta_{plato_seleccionado}"
+if key_plato not in st.session_state:
+    st.session_state[key_plato] = [insumo.copy() for insumo in RECETAS_DB[plato_seleccionado]["insumos"]]
+
+key_rendimiento = f"rendimiento_{plato_seleccionado}"
+if key_rendimiento not in st.session_state:
+    st.session_state[key_rendimiento] = RECETAS_DB[plato_seleccionado]["rendimiento_platos"]
 
 # --- BARRA LATERAL: COSTOS FIJOS Y PARÁMETROS COMERCIALES ---
 with st.sidebar:
@@ -74,31 +81,80 @@ with st.sidebar:
     utilidad_deseada = st.number_input("Utilidad Deseada (S/)", min_value=0.0, value=100.0, step=10.0)
     precio_venta = st.number_input("Precio de Venta por Porción (S/)", min_value=0.1, value=6.0, step=0.5)
 
-# --- DETALLE DEL LOTE Y CÁLCULO DE INSUMOS ---
-st.header(f"📋 Receta y Costos de Insumos: {plato_seleccionado}")
+# --- CONFIGURACIÓN DEL RENDIMIENTO DEL LOTE ---
+st.header(f"📋 Configuración de Receta: {plato_seleccionado}")
 
+col_rend, _ = st.columns([1, 2])
+with col_rend:
+    platos_producidos = st.number_input(
+        "🥣 Rendimiento Real del Lote (N° de Porciones que salen):",
+        min_value=1,
+        value=int(st.session_state[key_rendimiento]),
+        step=1,
+        help="Ajusta el total de platos/porciones que produce esta olla específica."
+    )
+    st.session_state[key_rendimiento] = platos_producidos
+
+st.divider()
+
+# --- EDICIÓN E INGRESO DINÁMICO DE INSUMOS ---
+st.subheader("⚖️ Insumos e Ingredientes Utilizados")
+
+# Botón para añadir nuevo insumo personalizado
+with st.expander("➕ Añadir Insumo Nuevo a esta Olla"):
+    col_n, col_g, col_c, col_b = st.columns([2, 1, 1, 1])
+    with col_n:
+        nuevo_nombre = st.text_input("Nombre del Insumo (ej. Chuño, Pimiento):", key="nuevo_nom")
+    with col_g:
+        nuevo_g = st.number_input("Cantidad (g):", min_value=0.0, value=500.0, step=50.0, key="nuevo_g")
+    with col_c:
+        nuevo_costo = st.number_input("Costo Total (S/):", min_value=0.0, value=5.0, step=0.5, key="nuevo_costo")
+    with col_b:
+        st.write(" ")
+        st.write(" ")
+        if st.button("Guardar Insumo"):
+            if nuevo_nombre.strip():
+                st.session_state[key_plato].append({
+                    "nombre": nuevo_nombre.strip(),
+                    "cantidad_g": nuevo_g,
+                    "costo_total": nuevo_costo
+                })
+                st.rerun()
+
+# Lista de insumos con opción de modificar o eliminar
+insumos_activos = st.session_state[key_plato]
 total_costo_insumos = 0.0
 total_gramos_insumos = 0.0
 
-# Formato de tabla para mostrar los insumos cargados
-tabla_insumos = []
-for item in datos_plato["insumos"]:
-    c_total = item["costo_total"]
-    g_total = item["cantidad_g"]
-    total_costo_insumos += c_total
-    total_gramos_insumos += g_total
+indices_a_eliminar = []
 
-    tabla_insumos.append({
-        "Insumo": item["nombre"],
-        "Cantidad (g / un)": f"{g_total} g" if g_total > 0 else "N/A",
-        "Costo Total (S/)": f"S/ {c_total:.2f}"
-    })
+for idx, item in enumerate(insumos_activos):
+    c1, c2, c3, c4 = st.columns([3, 2, 2, 1])
+    
+    with c1:
+        st.text_input(f"Ingrediente #{idx+1}", value=item["nombre"], key=f"nom_{plato_seleccionado}_{idx}", disabled=True)
+    with c2:
+        g_val = st.number_input(f"Gramos (g)", min_value=0.0, value=float(item["cantidad_g"]), step=50.0, key=f"g_{plato_seleccionado}_{idx}")
+        item["cantidad_g"] = g_val
+    with c3:
+        costo_val = st.number_input(f"Costo Total (S/)", min_value=0.0, value=float(item["costo_total"]), step=0.5, key=f"c_{plato_seleccionado}_{idx}")
+        item["costo_total"] = costo_val
+    with c4:
+        st.write(" ")
+        st.write(" ")
+        if st.button("🗑️", key=f"del_{plato_seleccionado}_{idx}", help="Quitar este insumo"):
+            indices_a_eliminar.append(idx)
 
-# Mostrar la lista de ingredientes en pantalla
-st.dataframe(tabla_insumos, use_container_width=True)
+    total_costo_insumos += item["costo_total"]
+    total_gramos_insumos += item["cantidad_g"]
+
+# Eliminar insumos seleccionados
+if indices_a_eliminar:
+    for i in sorted(indices_a_eliminar, reverse=True):
+        st.session_state[key_plato].pop(i)
+    st.rerun()
 
 # --- CÁLCULOS CONTABLES AUTOMÁTICOS ---
-platos_producidos = datos_plato["rendimiento_platos"]
 cvu = total_costo_insumos / platos_producidos if platos_producidos > 0 else 0.0
 costos_fijos = (horas_trabajo * cocineras * sueldo_hora) + costo_agua + costo_lena
 margen_ganancia = precio_venta - cvu
@@ -114,13 +170,13 @@ else:
 st.divider()
 st.header("📊 Resultados Contables en Tiempo Real")
 
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("Costo Insumos Lote", f"S/ {total_costo_insumos:.2f}")
-c2.metric("Rendimiento del Lote", f"{platos_producidos} porciones")
-c3.metric("Costo Var. Unitario (CVu)", f"S/ {cvu:.2f}")
-c4.metric("Costos Fijos Totales (CF)", f"S/ {costos_fijos:.2f}")
+m1, m2, m3, m4 = st.columns(4)
+m1.metric("Costo Insumos Lote", f"S/ {total_costo_insumos:.2f}")
+m2.metric("Rendimiento del Lote", f"{platos_producidos} porciones")
+m3.metric("Costo Var. Unitario (CVu)", f"S/ {cvu:.2f}")
+m4.metric("Costos Fijos Totales (CF)", f"S/ {costos_fijos:.2f}")
 
-st.subheader("🎯 Punto de Equilibrio y Recaudación")
+st.subheader("🎯 Punto de Equilibrio y Recaudación Meta")
 res1, res2 = st.columns(2)
 
 with res1:
