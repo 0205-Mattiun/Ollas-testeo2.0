@@ -9,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- BASE DE DATOS INICIAL DE RECETAS (INSUMOS Y UTENSILIOS) ---
+# --- BASE DE DATOS INICIAL DE RECETAS (INSUMOS Y UTENSILIOS Y OTROS) ---
 RECETAS_DB = {
     "SOPA DE MOTE": {
         "rendimiento_platos": 70,
@@ -68,7 +68,7 @@ key_plato = f"receta_{plato_seleccionado}"
 if key_plato not in st.session_state:
     st.session_state[key_plato] = [insumo.copy() for insumo in RECETAS_DB[plato_seleccionado]["insumos"]]
 
-# Inicializar utensilios en session_state
+# Inicializar utensilios y otros en session_state
 key_utensilios = f"utensilios_{plato_seleccionado}"
 if key_utensilios not in st.session_state:
     st.session_state[key_utensilios] = [u.copy() for u in RECETAS_DB[plato_seleccionado].get("utensilios", [])]
@@ -165,21 +165,21 @@ if indices_a_eliminar_ins:
 
 st.divider()
 
-# --- SECCIÓN DE UTENSILIOS Y DESCARTABLES POR PAQUETES ---
-st.subheader("🍽️ Utensilios y Descartables (por Paquetes)")
+# --- SECCIÓN DE UTENSILIOS Y OTROS POR PAQUETES ---
+st.subheader("🍽️ Utensilios y otros (por Paquetes)")
 
-with st.expander("➕ Añadir Paquete de Utensilios/Descartables"):
+with st.expander("➕ Añadir Paquete de Utensilios y otros"):
     col_un, col_upq, col_uc, col_ub = st.columns([2, 1, 1, 1])
     with col_un:
-        u_nombre = st.text_input("Nombre del Utensilio (ej. Vasos, Tazas, Bolsas):", key="u_nom")
+        u_nombre = st.text_input("Nombre (ej. Vasos, Tazas, Bolsas, Platos):", key="u_nom")
     with col_upq:
         u_pqt = st.number_input("N° de Paquetes:", min_value=1, value=1, step=1, key="u_pqt")
     with col_uc:
-        u_costo = st.number_input("Costo Total Utensilios (S/):", min_value=0.0, value=4.0, step=0.5, key="u_costo")
+        u_costo = st.number_input("Costo Total (S/):", min_value=0.0, value=4.0, step=0.5, key="u_costo")
     with col_ub:
         st.write(" ")
         st.write(" ")
-        if st.button("Guardar Utensilio"):
+        if st.button("Guardar Item"):
             if u_nombre.strip():
                 st.session_state[key_utensilios].append({
                     "nombre": u_nombre.strip(),
@@ -197,7 +197,7 @@ for idx, u_item in enumerate(utensilios_activos):
     uc1, uc2, uc3, uc4 = st.columns([3, 2, 2, 1])
     
     with uc1:
-        st.text_input(f"Utensilio #{idx+1}", value=u_item["nombre"], key=f"unom_{plato_seleccionado}_{idx}", disabled=True)
+        st.text_input(f"Item #{idx+1}", value=u_item["nombre"], key=f"unom_{plato_seleccionado}_{idx}", disabled=True)
     with uc2:
         pqt_val = st.number_input(f"N° Paquetes", min_value=0, value=int(u_item["paquetes"]), step=1, key=f"pqt_{plato_seleccionado}_{idx}")
         u_item["paquetes"] = pqt_val
@@ -207,7 +207,7 @@ for idx, u_item in enumerate(utensilios_activos):
     with uc4:
         st.write(" ")
         st.write(" ")
-        if st.button("🗑️", key=f"del_ut_{plato_seleccionado}_{idx}", help="Quitar este utensilio"):
+        if st.button("🗑️", key=f"del_ut_{plato_seleccionado}_{idx}", help="Quitar este item"):
             indices_a_eliminar_ut.append(idx)
 
     total_costo_utensilios += u_item["costo_total"]
@@ -235,7 +235,7 @@ st.divider()
 st.header("📊 Resultados Contables en Tiempo Real")
 
 m1, m2, m3, m4 = st.columns(4)
-m1.metric("Costo Var. Total (Insumos + Descartables)", f"S/ {costo_variable_total:.2f}")
+m1.metric("Costo Var. Total (Insumos + Utensilios y otros)", f"S/ {costo_variable_total:.2f}")
 m2.metric("Rendimiento del Lote", f"{platos_producidos} porciones")
 m3.metric("Costo Var. Unitario (CVu)", f"S/ {cvu:.2f}")
 m4.metric("Costos Fijos Totales (CF)", f"S/ {costos_fijos:.2f}")
