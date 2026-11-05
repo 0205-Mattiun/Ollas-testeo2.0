@@ -30,9 +30,9 @@ RECETAS_DB = {
             {"nombre": "Sal", "cantidad_g": 500.0, "costo_total": 2.00}
         ],
         "utensilios": [
-            {"nombre": "Platos descartables", "paquetes": 2, "costo_total": 8.00},
-            {"nombre": "Cucharas descartables", "paquetes": 2, "costo_total": 8.00},
-            {"nombre": "Servilletas", "paquetes": 1, "costo_total": 2.00}
+            {"nombre": "Platos descartables", "costo_total": 8.00},
+            {"nombre": "Cucharas descartables", "costo_total": 8.00},
+            {"nombre": "Servilletas", "costo_total": 2.00}
         ]
     },
     "YUCA RELLENA": {
@@ -48,8 +48,8 @@ RECETAS_DB = {
             {"nombre": "Huevo", "cantidad_g": 500.0, "costo_total": 4.00}
         ],
         "utensilios": [
-            {"nombre": "Platos descartables", "paquetes": 2, "costo_total": 8.00},
-            {"nombre": "Servilletas", "paquetes": 1, "costo_total": 2.00}
+            {"nombre": "Platos descartables", "costo_total": 8.00},
+            {"nombre": "Servilletas", "costo_total": 2.00}
         ]
     }
 }
@@ -165,15 +165,13 @@ if indices_a_eliminar_ins:
 
 st.divider()
 
-# --- SECCIÓN DE UTENSILIOS Y OTROS POR PAQUETES ---
-st.subheader("🍽️ Utensilios y otros (por Paquetes)")
+# --- SECCIÓN DE UTENSILIOS Y OTROS ---
+st.subheader("🍽️ Utensilios y otros")
 
-with st.expander("➕ Añadir Paquete de Utensilios y otros"):
-    col_un, col_upq, col_uc, col_ub = st.columns([2, 1, 1, 1])
+with st.expander("➕ Añadir Utensilio u otro"):
+    col_un, col_uc, col_ub = st.columns([3, 2, 1])
     with col_un:
-        u_nombre = st.text_input("Nombre (ej. Vasos, Tazas, Bolsas, Platos):", key="u_nom")
-    with col_upq:
-        u_pqt = st.number_input("N° de Paquetes:", min_value=1, value=1, step=1, key="u_pqt")
+        u_nombre = st.text_input("Nombre:", key="u_nom")
     with col_uc:
         u_costo = st.number_input("Costo Total (S/):", min_value=0.0, value=4.0, step=0.5, key="u_costo")
     with col_ub:
@@ -183,7 +181,6 @@ with st.expander("➕ Añadir Paquete de Utensilios y otros"):
             if u_nombre.strip():
                 st.session_state[key_utensilios].append({
                     "nombre": u_nombre.strip(),
-                    "paquetes": u_pqt,
                     "costo_total": u_costo
                 })
                 st.rerun()
@@ -194,17 +191,14 @@ total_costo_utensilios = 0.0
 indices_a_eliminar_ut = []
 
 for idx, u_item in enumerate(utensilios_activos):
-    uc1, uc2, uc3, uc4 = st.columns([3, 2, 2, 1])
+    uc1, uc2, uc3 = st.columns([4, 3, 1])
     
     with uc1:
         st.text_input(f"Item #{idx+1}", value=u_item["nombre"], key=f"unom_{plato_seleccionado}_{idx}", disabled=True)
     with uc2:
-        pqt_val = st.number_input(f"N° Paquetes", min_value=0, value=int(u_item["paquetes"]), step=1, key=f"pqt_{plato_seleccionado}_{idx}")
-        u_item["paquetes"] = pqt_val
-    with uc3:
         ucosto_val = st.number_input(f"Costo Total (S/)", min_value=0.0, value=float(u_item["costo_total"]), step=0.5, key=f"uc_{plato_seleccionado}_{idx}")
         u_item["costo_total"] = ucosto_val
-    with uc4:
+    with uc3:
         st.write(" ")
         st.write(" ")
         if st.button("🗑️", key=f"del_ut_{plato_seleccionado}_{idx}", help="Quitar este item"):
