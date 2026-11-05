@@ -9,47 +9,47 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- BASE DE DATOS INICIAL DE RECETAS (INSUMOS Y UTENSILIOS Y OTROS) ---
+# --- BASE DE DATOS INICIAL DE RECETAS ---
 RECETAS_DB = {
     "SOPA DE MOTE": {
         "rendimiento_platos": 70,
         "insumos": [
-            {"nombre": "Mote seco", "cantidad_g": 5000.0, "costo_total": 30.00},
-            {"nombre": "Mondongo", "cantidad_g": 1500.0, "costo_total": 21.00},
-            {"nombre": "Piltrafa", "cantidad_g": 1500.0, "costo_total": 22.50},
-            {"nombre": "Huesos de manzana", "cantidad_g": 4000.0, "costo_total": 12.00},
-            {"nombre": "Pata de vaca", "cantidad_g": 1000.0, "costo_total": 22.00},
-            {"nombre": "Arroz", "cantidad_g": 300.0, "costo_total": 1.50},
-            {"nombre": "Cebolla (1 un)", "cantidad_g": 200.0, "costo_total": 2.00},
-            {"nombre": "Ajo (1 un)", "cantidad_g": 50.0, "costo_total": 1.00},
-            {"nombre": "Perejil", "cantidad_g": 100.0, "costo_total": 2.00},
-            {"nombre": "Orégano", "cantidad_g": 50.0, "costo_total": 2.00},
-            {"nombre": "Hierbabuena", "cantidad_g": 100.0, "costo_total": 2.00},
-            {"nombre": "Limón", "cantidad_g": 500.0, "costo_total": 2.00},
-            {"nombre": "Rocoto", "cantidad_g": 500.0, "costo_total": 3.50},
-            {"nombre": "Sal", "cantidad_g": 500.0, "costo_total": 2.00}
+            {"id": "ins_1", "nombre": "Mote seco", "cantidad_g": 5000.0, "costo_total": 30.00},
+            {"id": "ins_2", "nombre": "Mondongo", "cantidad_g": 1500.0, "costo_total": 21.00},
+            {"id": "ins_3", "nombre": "Piltrafa", "cantidad_g": 1500.0, "costo_total": 22.50},
+            {"id": "ins_4", "nombre": "Huesos de manzana", "cantidad_g": 4000.0, "costo_total": 12.00},
+            {"id": "ins_5", "nombre": "Pata de vaca", "cantidad_g": 1000.0, "costo_total": 22.00},
+            {"id": "ins_6", "nombre": "Arroz", "cantidad_g": 300.0, "costo_total": 1.50},
+            {"id": "ins_7", "nombre": "Cebolla (1 un)", "cantidad_g": 200.0, "costo_total": 2.00},
+            {"id": "ins_8", "nombre": "Ajo (1 un)", "cantidad_g": 50.0, "costo_total": 1.00},
+            {"id": "ins_9", "nombre": "Perejil", "cantidad_g": 100.0, "costo_total": 2.00},
+            {"id": "ins_10", "nombre": "Orégano", "cantidad_g": 50.0, "costo_total": 2.00},
+            {"id": "ins_11", "nombre": "Hierbabuena", "cantidad_g": 100.0, "costo_total": 2.00},
+            {"id": "ins_12", "nombre": "Limón", "cantidad_g": 500.0, "costo_total": 2.00},
+            {"id": "ins_13", "nombre": "Rocoto", "cantidad_g": 500.0, "costo_total": 3.50},
+            {"id": "ins_14", "nombre": "Sal", "cantidad_g": 500.0, "costo_total": 2.00}
         ],
         "utensilios": [
-            {"nombre": "Platos descartables", "costo_total": 8.00},
-            {"nombre": "Cucharas descartables", "costo_total": 8.00},
-            {"nombre": "Servilletas", "costo_total": 2.00}
+            {"id": "ut_1", "nombre": "Platos descartables", "costo_total": 8.00},
+            {"id": "ut_2", "nombre": "Cucharas descartables", "costo_total": 8.00},
+            {"id": "ut_3", "nombre": "Servilletas", "costo_total": 2.00}
         ]
     },
     "YUCA RELLENA": {
         "rendimiento_platos": 70,
         "insumos": [
-            {"nombre": "Yuca amarilla", "cantidad_g": 5000.0, "costo_total": 20.00},
-            {"nombre": "Harina de chuño", "cantidad_g": 1000.0, "costo_total": 10.00},
-            {"nombre": "Carne molida", "cantidad_g": 3000.0, "costo_total": 66.00},
-            {"nombre": "Cebolla", "cantidad_g": 4000.0, "costo_total": 8.00},
-            {"nombre": "Ají panca", "cantidad_g": 100.0, "costo_total": 2.50},
-            {"nombre": "Especias (Pimienta, Orégano, Comino)", "cantidad_g": 50.0, "costo_total": 2.00},
-            {"nombre": "Ajo", "cantidad_g": 100.0, "costo_total": 2.00},
-            {"nombre": "Huevo", "cantidad_g": 500.0, "costo_total": 4.00}
+            {"id": "ins_20", "nombre": "Yuca amarilla", "cantidad_g": 5000.0, "costo_total": 20.00},
+            {"id": "ins_21", "nombre": "Harina de chuño", "cantidad_g": 1000.0, "costo_total": 10.00},
+            {"id": "ins_22", "nombre": "Carne molida", "cantidad_g": 3000.0, "costo_total": 66.00},
+            {"id": "ins_23", "nombre": "Cebolla", "cantidad_g": 4000.0, "costo_total": 8.00},
+            {"id": "ins_24", "nombre": "Ají panca", "cantidad_g": 100.0, "costo_total": 2.50},
+            {"id": "ins_25", "nombre": "Especias (Pimienta, Orégano, Comino)", "cantidad_g": 50.0, "costo_total": 2.00},
+            {"id": "ins_26", "nombre": "Ajo", "cantidad_g": 100.0, "costo_total": 2.00},
+            {"id": "ins_27", "nombre": "Huevo", "cantidad_g": 500.0, "costo_total": 4.00}
         ],
         "utensilios": [
-            {"nombre": "Platos descartables", "costo_total": 8.00},
-            {"nombre": "Servilletas", "costo_total": 2.00}
+            {"id": "ut_20", "nombre": "Platos descartables", "costo_total": 8.00},
+            {"id": "ut_21", "nombre": "Servilletas", "costo_total": 2.00}
         ]
     }
 }
@@ -63,15 +63,15 @@ plato_seleccionado = st.selectbox(
     options=list(RECETAS_DB.keys())
 )
 
-# Inicializar insumos en session_state
+# Inicializar insumos en session_state con copia profunda
 key_plato = f"receta_{plato_seleccionado}"
 if key_plato not in st.session_state:
-    st.session_state[key_plato] = [insumo.copy() for insumo in RECETAS_DB[plato_seleccionado]["insumos"]]
+    st.session_state[key_plato] = [dict(ins) for ins in RECETAS_DB[plato_seleccionado]["insumos"]]
 
-# Inicializar utensilios y otros en session_state
+# Inicializar utensilios en session_state
 key_utensilios = f"utensilios_{plato_seleccionado}"
 if key_utensilios not in st.session_state:
-    st.session_state[key_utensilios] = [u.copy() for u in RECETAS_DB[plato_seleccionado].get("utensilios", [])]
+    st.session_state[key_utensilios] = [dict(u) for u in RECETAS_DB[plato_seleccionado].get("utensilios", [])]
 
 # Inicializar rendimiento
 key_rendimiento = f"rendimiento_{plato_seleccionado}"
@@ -125,7 +125,10 @@ with st.expander("➕ Añadir Insumo Nuevo a esta Olla"):
         st.write(" ")
         if st.button("Guardar Insumo"):
             if nuevo_nombre.strip():
+                import time
+                nuevo_id = f"ins_{int(time.time()*1000)}"
                 st.session_state[key_plato].append({
+                    "id": nuevo_id,
                     "nombre": nuevo_nombre.strip(),
                     "cantidad_g": nuevo_g,
                     "costo_total": nuevo_costo
@@ -136,31 +139,31 @@ insumos_activos = st.session_state[key_plato]
 total_costo_insumos = 0.0
 total_gramos_insumos = 0.0
 
-indices_a_eliminar_ins = []
+eliminar_insumo_id = None
 
 for idx, item in enumerate(insumos_activos):
+    item_id = item.get("id", f"ins_idx_{idx}")
     c1, c2, c3, c4 = st.columns([3, 2, 2, 1])
     
     with c1:
-        st.text_input(f"Ingrediente #{idx+1}", value=item["nombre"], key=f"nom_{plato_seleccionado}_{idx}", disabled=True)
+        st.text_input(f"Ingrediente #{idx+1}", value=item["nombre"], key=f"nom_{item_id}", disabled=True)
     with c2:
-        g_val = st.number_input(f"Gramos (g)", min_value=0.0, value=float(item["cantidad_g"]), step=50.0, key=f"g_{plato_seleccionado}_{idx}")
+        g_val = st.number_input(f"Gramos (g)", min_value=0.0, value=float(item["cantidad_g"]), step=50.0, key=f"g_{item_id}")
         item["cantidad_g"] = g_val
     with c3:
-        costo_val = st.number_input(f"Costo Total (S/)", min_value=0.0, value=float(item["costo_total"]), step=0.5, key=f"c_{plato_seleccionado}_{idx}")
+        costo_val = st.number_input(f"Costo Total (S/)", min_value=0.0, value=float(item["costo_total"]), step=0.5, key=f"c_{item_id}")
         item["costo_total"] = costo_val
     with c4:
         st.write(" ")
         st.write(" ")
-        if st.button("🗑️", key=f"del_ins_{plato_seleccionado}_{idx}", help="Quitar este insumo"):
-            indices_a_eliminar_ins.append(idx)
+        if st.button("🗑️", key=f"del_ins_{item_id}", help="Quitar este insumo"):
+            eliminar_insumo_id = item_id
 
     total_costo_insumos += item["costo_total"]
     total_gramos_insumos += item["cantidad_g"]
 
-if indices_a_eliminar_ins:
-    for i in sorted(indices_a_eliminar_ins, reverse=True):
-        st.session_state[key_plato].pop(i)
+if eliminar_insumo_id is not None:
+    st.session_state[key_plato] = [x for x in st.session_state[key_plato] if x.get("id") != eliminar_insumo_id]
     st.rerun()
 
 st.divider()
@@ -179,7 +182,10 @@ with st.expander("➕ Añadir Utensilio u otro"):
         st.write(" ")
         if st.button("Guardar Item"):
             if u_nombre.strip():
+                import time
+                u_id = f"ut_{int(time.time()*1000)}"
                 st.session_state[key_utensilios].append({
+                    "id": u_id,
                     "nombre": u_nombre.strip(),
                     "costo_total": u_costo
                 })
@@ -188,27 +194,27 @@ with st.expander("➕ Añadir Utensilio u otro"):
 utensilios_activos = st.session_state[key_utensilios]
 total_costo_utensilios = 0.0
 
-indices_a_eliminar_ut = []
+eliminar_utensilio_id = None
 
 for idx, u_item in enumerate(utensilios_activos):
+    u_id = u_item.get("id", f"ut_idx_{idx}")
     uc1, uc2, uc3 = st.columns([4, 3, 1])
     
     with uc1:
-        st.text_input(f"Item #{idx+1}", value=u_item["nombre"], key=f"unom_{plato_seleccionado}_{idx}", disabled=True)
+        st.text_input(f"Item #{idx+1}", value=u_item["nombre"], key=f"unom_{u_id}", disabled=True)
     with uc2:
-        ucosto_val = st.number_input(f"Costo Total (S/)", min_value=0.0, value=float(u_item["costo_total"]), step=0.5, key=f"uc_{plato_seleccionado}_{idx}")
+        ucosto_val = st.number_input(f"Costo Total (S/)", min_value=0.0, value=float(u_item["costo_total"]), step=0.5, key=f"uc_{u_id}")
         u_item["costo_total"] = ucosto_val
     with uc3:
         st.write(" ")
         st.write(" ")
-        if st.button("🗑️", key=f"del_ut_{plato_seleccionado}_{idx}", help="Quitar este item"):
-            indices_a_eliminar_ut.append(idx)
+        if st.button("🗑️", key=f"del_ut_{u_id}", help="Quitar este item"):
+            eliminar_utensilio_id = u_id
 
     total_costo_utensilios += u_item["costo_total"]
 
-if indices_a_eliminar_ut:
-    for i in sorted(indices_a_eliminar_ut, reverse=True):
-        st.session_state[key_utensilios].pop(i)
+if eliminar_utensilio_id is not None:
+    st.session_state[key_utensilios] = [x for x in st.session_state[key_utensilios] if x.get("id") != eliminar_utensilio_id]
     st.rerun()
 
 # --- CÁLCULOS CONTABLES AUTOMÁTICOS ---
