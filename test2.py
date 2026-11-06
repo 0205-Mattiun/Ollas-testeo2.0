@@ -12,11 +12,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Carpeta para guardar los registros
-CARPETA_REGISTROS = "historial_registros"
-if not os.path.exists(CARPETA_REGISTROS):
-    os.makedirs(CARPETA_REGISTROS)
-
 # --- BASE DE DATOS INICIAL DE RECETAS ---
 RECETAS_DB = {
     "SOPA DE MOTE": {
@@ -64,11 +59,32 @@ RECETAS_DB = {
 
 st.title("🍲 Simulador de Punto de Equilibrio - Ollas UNACEM")
 
+# --- IDENTIFICACIÓN DE LA OLLA COMÚN EN LA BARRA LATERAL ---
+with st.sidebar:
+    st.header("🏠 Identificación del Local")
+    nombre_olla_input = st.text_input(
+        "Nombre o ID de tu Olla Común:", 
+        value="Olla_1",
+        help="Los registros guardados se organizarán dentro del historial de esta Olla especifica."
+    )
+    # Limpiar nombre para crear una carpeta segura sin caracteres raros
+    nombre_olla_clean = "".join(c for c in nombre_olla_input if c.isalnum() or c in (" ", "_", "-")).strip().replace(" ", "_")
+    if not nombre_olla_clean:
+        nombre_olla_clean = "Olla_General"
+
+# Configurar ruta de guardado según la Olla seleccionada
+CARPETA_BASE = "historial_registros"
+CARPETA_OLLA = os.path.join(CARPETA_BASE, nombre_olla_clean)
+
+if not os.path.exists(CARPETA_OLLA):
+    os.makedirs(CARPETA_OLLA)
+
 # MENÚ PRINCIPAL
 modo_app = st.sidebar.radio("📌 Menú Principal", ["✏️ Crear Nueva Configuración", "📁 Ver Registros Guardados (Lectura)"])
 
 if modo_app == "✏️ Crear Nueva Configuración":
 
+    st.caption(f"📍 Trabajando para: **{nombre_olla_clean.replace('_', ' ')}**")
     plato_seleccionado = st.selectbox("📌 Selecciona el Plato a Evaluar:", options=list(RECETAS_DB.keys()))
 
     key_plato = f"receta_{plato_seleccionado}"
@@ -83,7 +99,7 @@ if modo_app == "✏️ Crear Nueva Configuración":
     if key_rendimiento not in st.session_state:
         st.session_state[key_rendimiento] = RECETAS_DB[plato_seleccionado]["rendimiento_platos"]
 
-    # BARRA LATERAL
+    # BARRA LATERAL: PARÁMETROS CONTABLES
     with st.sidebar:
         st.header("⚙️ Parámetros Fijos y Ventas")
         st.subheader("👥 Mano de Obra y Costos Fijos")
@@ -249,7 +265,7 @@ if modo_app == "✏️ Crear Nueva Configuración":
 
     # BOTÓN GUARDAR
     st.divider()
-    st.subheader("💾 Guardar esta Configuración en el Historial")
+    st.subheader(f"💾 Guardar Registro para: {nombre_olla_clean.replace('_', ' ')}")
     col_reg_nom, col_reg_btn = st.columns([3, 1])
     with col_reg_nom:
         nombre_registro = st.text_input("Nombre para identificar este guardado (ej: Yuca Rellena - Olla 1):", key="nom_guardado")
@@ -259,6 +275,7 @@ if modo_app == "✏️ Crear Nueva Configuración":
         if st.button("💾 Guardar en Registro"):
             if nombre_registro.strip():
                 datos_guardar = {
+                    "olla": nombre_olla_clean,
                     "plato": plato_seleccionado,
                     "nombre_registro": nombre_registro.strip(),
                     "fecha": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -280,24 +297,24 @@ if modo_app == "✏️ Crear Nueva Configuración":
                         "pe_soles": pe_soles
                     }
                 }
-                filename = f"{CARPETA_REGISTROS}/{int(time.time())}_{plato_seleccionado}.json"
+                filename = f"{CARPETA_OLLA}/{int(time.time())}_{plato_seleccionado}.json"
                 with open(filename, "w", encoding="utf-8") as f:
                     json.dump(datos_guardar, f, ensure_ascii=False, indent=4)
-                st.success(f"✅ ¡Registro '{nombre_registro}' guardado!")
+                st.success(f"✅ ¡Registro '{nombre_registro}' guardado para {nombre_olla_clean.replace('_', ' ')}!")
             else:
                 st.warning("Escribe un nombre para guardar.")
 
 elif modo_app == "📁 Ver Registros Guardados (Lectura)":
-    st.header("📂 Historial de Registros Guardados")
+    st.header(f"📂 Historial de Registros: {nombre_olla_clean.replace('_', ' ')}")
     
-    archivos = [f for f in os.listdir(CARPETA_REGISTROS) if f.endswith(".json")]
+    archivos = [f for f in os.listdir(CARPETA_OLLA) if f.endswith(".json")]
     
     if not archivos:
-        st.info("No hay ninguna configuración guardada en el historial.")
+        st.info(f"No hay ninguna configuración guardada en el historial de **{nombre_olla_clean.replace('_', ' ')}**.")
     else:
         opciones_registros = {}
         for archivo in archivos:
-            filepath = os.path.join(CARPETA_REGISTROS, archivo)
+            filepath = os.path.join(CARPETA_OLLA, archivo)
             with open(filepath, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 nombre_display = f"{data.get('nombre_registro', 'Sin Nombre')} | {data.get('plato')} ({data.get('fecha')})"
@@ -315,7 +332,7 @@ elif modo_app == "📁 Ver Registros Guardados (Lectura)":
                 st.write(" ")
                 st.write(" ")
                 if st.button("🗑️ Eliminar Registro", help="Borrar este registro permanentemente"):
-                    filepath_borrar = os.path.join(CARPETA_REGISTROS, archivo_actual)
+                    filepath_borrar = os.path.join(CARPETA_OLLA, archivo_actual)
                     if os.path.exists(filepath_borrar):
                         os.remove(filepath_borrar)
                         st.success("¡Registro eliminado con éxito!")
@@ -323,7 +340,7 @@ elif modo_app == "📁 Ver Registros Guardados (Lectura)":
 
             st.divider()
             st.subheader(f"📄 Reporte Guardado: {reg['nombre_registro']}")
-            st.caption(f"Plato: **{reg['plato']}** | Fecha: **{reg['fecha']}**")
+            st.caption(f"Olla: **{reg.get('olla', nombre_olla_clean)}** | Plato: **{reg['plato']}** | Fecha: **{reg['fecha']}**")
 
             # Muestra de Resultados (Solo Lectura)
             st.subheader("📊 Resultados de la Configuración Guardada")
