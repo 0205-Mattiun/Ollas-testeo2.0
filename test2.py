@@ -65,7 +65,7 @@ CARPETA_BASE = "historial_registros"
 if not os.path.exists(CARPETA_BASE):
     os.makedirs(CARPETA_BASE)
 
-# Obtener lista de Ollas registradas actualmente (carpetas dentro de historial_registros)
+# Obtener lista de Ollas registradas actualmente
 ollas_existentes = [d for d in os.listdir(CARPETA_BASE) if os.path.isdir(os.path.join(CARPETA_BASE, d))]
 if not ollas_existentes:
     os.makedirs(os.path.join(CARPETA_BASE, "Olla_1"))
@@ -93,14 +93,20 @@ with st.sidebar:
     else:
         nombre_olla_clean = olla_seleccionada_menu
         
-        # BOTÓN PARA ELIMINAR LA OLLA SELECCIONADA Y SUS REGISTROS
+        # ELIMINAR OLLA CON CONFIRMACIÓN PREVIA
         with st.expander("⚠️ Opciones de Olla"):
-            if st.button("🗑️ Eliminar esta Olla", help="Borra la olla y TODOS sus registros guardados permanentemente"):
-                ruta_olla_eliminar = os.path.join(CARPETA_BASE, nombre_olla_clean)
-                if os.path.exists(ruta_olla_eliminar):
-                    shutil.rmtree(ruta_olla_eliminar)
-                    st.success(f"¡Olla '{nombre_olla_clean}' y sus registros fueron eliminados!")
-                    st.rerun()
+            st.warning(f"¿Deseas eliminar '{nombre_olla_clean.replace('_', ' ')}'?")
+            confirmar_del_olla = st.checkbox("Sí, estoy seguro de eliminar esta Olla y todos sus datos", key=f"conf_del_{nombre_olla_clean}")
+            
+            if st.button("🗑️ Confirmar y Eliminar Olla"):
+                if confirmar_del_olla:
+                    ruta_olla_eliminar = os.path.join(CARPETA_BASE, nombre_olla_clean)
+                    if os.path.exists(ruta_olla_eliminar):
+                        shutil.rmtree(ruta_olla_eliminar)
+                        st.success(f"¡Olla '{nombre_olla_clean}' y sus registros fueron eliminados!")
+                        st.rerun()
+                else:
+                    st.error("Debes marcar la casilla 'Sí, estoy seguro' para poder eliminar.")
 
 # Ruta de almacenamiento activa para la Olla seleccionada
 CARPETA_OLLA = os.path.join(CARPETA_BASE, nombre_olla_clean)
@@ -348,23 +354,25 @@ elif modo_app == "📁 Ver Registros Guardados (Lectura)":
                 nombre_display = f"{data.get('nombre_registro', 'Sin Nombre')} | {data.get('plato')} ({data.get('fecha')})"
                 opciones_registros[nombre_display] = (archivo, data)
 
-        col_sel, col_del = st.columns([4, 1])
-        
-        with col_sel:
-            reg_seleccionado = st.selectbox("🔍 Selecciona un registro para ver sus datos:", options=list(opciones_registros.keys()))
+        reg_seleccionado = st.selectbox("🔍 Selecciona un registro para ver sus datos:", options=list(opciones_registros.keys()))
         
         if reg_seleccionado:
             archivo_actual, reg = opciones_registros[reg_seleccionado]
             
-            with col_del:
-                st.write(" ")
-                st.write(" ")
-                if st.button("🗑️ Eliminar Registro", help="Borrar este registro permanentemente"):
-                    filepath_borrar = os.path.join(CARPETA_OLLA, archivo_actual)
-                    if os.path.exists(filepath_borrar):
-                        os.remove(filepath_borrar)
-                        st.success("¡Registro eliminado con éxito!")
-                        st.rerun()
+            # ELIMINAR REGISTRO CON CONFIRMACIÓN PREVIA
+            with st.expander("🗑️ Eliminar este Registro Guardado"):
+                st.warning(f"¿Estás seguro de eliminar el registro '{reg['nombre_registro']}'?")
+                confirmar_del_reg = st.checkbox("Sí, deseo eliminar este registro permanentemente", key=f"conf_reg_{archivo_actual}")
+                
+                if st.button("🗑️ Confirmar Eliminación de Registro"):
+                    if confirmar_del_reg:
+                        filepath_borrar = os.path.join(CARPETA_OLLA, archivo_actual)
+                        if os.path.exists(filepath_borrar):
+                            os.remove(filepath_borrar)
+                            st.success("¡Registro eliminado con éxito!")
+                            st.rerun()
+                    else:
+                        st.error("Debes marcar la casilla 'Sí, deseo eliminar' para confirmar.")
 
             st.divider()
             st.subheader(f"📄 Reporte Guardado: {reg['nombre_registro']}")
