@@ -59,23 +59,40 @@ RECETAS_DB = {
 
 st.title("🍲 Simulador de Punto de Equilibrio - Ollas UNACEM")
 
-# --- IDENTIFICACIÓN DE LA OLLA COMÚN EN LA BARRA LATERAL ---
-with st.sidebar:
-    st.header("🏠 Identificación del Local")
-    nombre_olla_input = st.text_input(
-        "Nombre o ID de tu Olla Común:", 
-        value="Olla_1",
-        help="Los registros guardados se organizarán dentro del historial de esta Olla especifica."
-    )
-    # Limpiar nombre para crear una carpeta segura sin caracteres raros
-    nombre_olla_clean = "".join(c for c in nombre_olla_input if c.isalnum() or c in (" ", "_", "-")).strip().replace(" ", "_")
-    if not nombre_olla_clean:
-        nombre_olla_clean = "Olla_General"
-
-# Configurar ruta de guardado según la Olla seleccionada
+# --- GESTIÓN DINÁMICA DE OLLAS Y MULTI-CARPETAS ---
 CARPETA_BASE = "historial_registros"
-CARPETA_OLLA = os.path.join(CARPETA_BASE, nombre_olla_clean)
+if not os.path.exists(CARPETA_BASE):
+    os.makedirs(CARPETA_BASE)
 
+# Obtener lista de Ollas registradas actualmente (carpetas dentro de historial_registros)
+ollas_existentes = [d for d in os.listdir(CARPETA_BASE) if os.path.isdir(os.path.join(CARPETA_BASE, d))]
+if not ollas_existentes:
+    ollas_existentes = ["Olla_1"]
+
+with st.sidebar:
+    st.header("🏠 Selección de Olla Común")
+    
+    opciones_olla = ollas_existentes + ["➕ Registrar Nueva Olla..."]
+    olla_seleccionada_menu = st.selectbox("Selecciona la Olla a trabajar:", options=opciones_olla)
+    
+    if olla_seleccionada_menu == "➕ Registrar Nueva Olla...":
+        nueva_olla_nombre = st.text_input("Escribe el Nombre/ID de la Nueva Olla:")
+        if st.button("➕ Crear Olla"):
+            if nueva_olla_nombre.strip():
+                clean_nom = "".join(c for c in nueva_olla_nombre if c.isalnum() or c in (" ", "_", "-")).strip().replace(" ", "_")
+                ruta_nueva = os.path.join(CARPETA_BASE, clean_nom)
+                if not os.path.exists(ruta_nueva):
+                    os.makedirs(ruta_nueva)
+                st.success(f"¡Olla '{clean_nom}' creada con éxito!")
+                st.rerun()
+            else:
+                st.warning("Escribe un nombre válido.")
+        nombre_olla_clean = "Olla_Temporal"
+    else:
+        nombre_olla_clean = olla_seleccionada_menu
+
+# Ruta de almacenamiento activa para la Olla seleccionada
+CARPETA_OLLA = os.path.join(CARPETA_BASE, nombre_olla_clean)
 if not os.path.exists(CARPETA_OLLA):
     os.makedirs(CARPETA_OLLA)
 
@@ -84,7 +101,7 @@ modo_app = st.sidebar.radio("📌 Menú Principal", ["✏️ Crear Nueva Configu
 
 if modo_app == "✏️ Crear Nueva Configuración":
 
-    st.caption(f"📍 Trabajando para: **{nombre_olla_clean.replace('_', ' ')}**")
+    st.info(f"📍 Olla activa actual: **{nombre_olla_clean.replace('_', ' ')}**")
     plato_seleccionado = st.selectbox("📌 Selecciona el Plato a Evaluar:", options=list(RECETAS_DB.keys()))
 
     key_plato = f"receta_{plato_seleccionado}"
@@ -265,10 +282,10 @@ if modo_app == "✏️ Crear Nueva Configuración":
 
     # BOTÓN GUARDAR
     st.divider()
-    st.subheader(f"💾 Guardar Registro para: {nombre_olla_clean.replace('_', ' ')}")
+    st.subheader(f"💾 Guardar Registro en: {nombre_olla_clean.replace('_', ' ')}")
     col_reg_nom, col_reg_btn = st.columns([3, 1])
     with col_reg_nom:
-        nombre_registro = st.text_input("Nombre para identificar este guardado (ej: Yuca Rellena - Olla 1):", key="nom_guardado")
+        nombre_registro = st.text_input("Nombre para este guardado (ej: Olla San Martin - Lote 1):", key="nom_guardado")
     with col_reg_btn:
         st.write(" ")
         st.write(" ")
@@ -300,12 +317,12 @@ if modo_app == "✏️ Crear Nueva Configuración":
                 filename = f"{CARPETA_OLLA}/{int(time.time())}_{plato_seleccionado}.json"
                 with open(filename, "w", encoding="utf-8") as f:
                     json.dump(datos_guardar, f, ensure_ascii=False, indent=4)
-                st.success(f"✅ ¡Registro '{nombre_registro}' guardado para {nombre_olla_clean.replace('_', ' ')}!")
+                st.success(f"✅ ¡Registro '{nombre_registro}' guardado dentro de {nombre_olla_clean.replace('_', ' ')}!")
             else:
                 st.warning("Escribe un nombre para guardar.")
 
 elif modo_app == "📁 Ver Registros Guardados (Lectura)":
-    st.header(f"📂 Historial de Registros: {nombre_olla_clean.replace('_', ' ')}")
+    st.header(f"📂 Historial de Registros de: {nombre_olla_clean.replace('_', ' ')}")
     
     archivos = [f for f in os.listdir(CARPETA_OLLA) if f.endswith(".json")]
     
