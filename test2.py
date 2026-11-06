@@ -3,6 +3,7 @@ import math
 import json
 import os
 import time
+import shutil
 
 # Configuración de la página
 st.set_page_config(
@@ -67,6 +68,7 @@ if not os.path.exists(CARPETA_BASE):
 # Obtener lista de Ollas registradas actualmente (carpetas dentro de historial_registros)
 ollas_existentes = [d for d in os.listdir(CARPETA_BASE) if os.path.isdir(os.path.join(CARPETA_BASE, d))]
 if not ollas_existentes:
+    os.makedirs(os.path.join(CARPETA_BASE, "Olla_1"))
     ollas_existentes = ["Olla_1"]
 
 with st.sidebar:
@@ -90,6 +92,15 @@ with st.sidebar:
         nombre_olla_clean = "Olla_Temporal"
     else:
         nombre_olla_clean = olla_seleccionada_menu
+        
+        # BOTÓN PARA ELIMINAR LA OLLA SELECCIONADA Y SUS REGISTROS
+        with st.expander("⚠️ Opciones de Olla"):
+            if st.button("🗑️ Eliminar esta Olla", help="Borra la olla y TODOS sus registros guardados permanentemente"):
+                ruta_olla_eliminar = os.path.join(CARPETA_BASE, nombre_olla_clean)
+                if os.path.exists(ruta_olla_eliminar):
+                    shutil.rmtree(ruta_olla_eliminar)
+                    st.success(f"¡Olla '{nombre_olla_clean}' y sus registros fueron eliminados!")
+                    st.rerun()
 
 # Ruta de almacenamiento activa para la Olla seleccionada
 CARPETA_OLLA = os.path.join(CARPETA_BASE, nombre_olla_clean)
