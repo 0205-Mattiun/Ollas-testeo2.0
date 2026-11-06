@@ -1,5 +1,8 @@
 import streamlit as st
 import math
+import json
+import os
+import time
 
 # Configuración de la página
 st.set_page_config(
@@ -8,6 +11,11 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Carpeta para guardar los registros
+CARPETA_REGISTROS = "historial_registros"
+if not os.path.exists(CARPETA_REGISTROS):
+    os.makedirs(CARPETA_REGISTROS)
 
 # --- BASE DE DATOS INICIAL DE RECETAS ---
 RECETAS_DB = {
@@ -54,203 +62,294 @@ RECETAS_DB = {
     }
 }
 
-st.title("🍲 Simulador de Punto de Equilibrio por Producto")
-st.subheader("Proyecto Ollas UNACEM")
+st.title("🍲 Simulador de Punto de Equilibrio - Ollas UNACEM")
 
-# --- SELECCIÓN DE PRODUCTO Y CONTROL EN SESSION STATE ---
-plato_seleccionado = st.selectbox(
-    "📌 Selecciona el Plato a Evaluar:",
-    options=list(RECETAS_DB.keys())
-)
+# MENÚ PRINCIPAL
+modo_app = st.sidebar.radio("📌 Menú Principal", ["✏️ Crear Nueva Configuración", "📁 Ver Registros Guardados (Lectura)"])
 
-# Inicializar insumos en session_state con copia profunda
-key_plato = f"receta_{plato_seleccionado}"
-if key_plato not in st.session_state:
-    st.session_state[key_plato] = [dict(ins) for ins in RECETAS_DB[plato_seleccionado]["insumos"]]
+if modo_app == "✏️ Crear Nueva Configuración":
 
-# Inicializar utensilios en session_state
-key_utensilios = f"utensilios_{plato_seleccionado}"
-if key_utensilios not in st.session_state:
-    st.session_state[key_utensilios] = [dict(u) for u in RECETAS_DB[plato_seleccionado].get("utensilios", [])]
+    plato_seleccionado = st.selectbox("📌 Selecciona el Plato a Evaluar:", options=list(RECETAS_DB.keys()))
 
-# Inicializar rendimiento
-key_rendimiento = f"rendimiento_{plato_seleccionado}"
-if key_rendimiento not in st.session_state:
-    st.session_state[key_rendimiento] = RECETAS_DB[plato_seleccionado]["rendimiento_platos"]
+    key_plato = f"receta_{plato_seleccionado}"
+    if key_plato not in st.session_state:
+        st.session_state[key_plato] = [dict(ins) for ins in RECETAS_DB[plato_seleccionado]["insumos"]]
 
-# --- BARRA LATERAL: COSTOS FIJOS Y PARÁMETROS COMERCIALES ---
-with st.sidebar:
-    st.header("⚙️ Parámetros Fijos y Ventas")
+    key_utensilios = f"utensilios_{plato_seleccionado}"
+    if key_utensilios not in st.session_state:
+        st.session_state[key_utensilios] = [dict(u) for u in RECETAS_DB[plato_seleccionado].get("utensilios", [])]
 
-    st.subheader("👥 Mano de Obra y Costos Fijos")
-    horas_trabajo = st.number_input("Tiempo de Trabajo (Horas)", min_value=0.0, value=4.0, step=0.5)
-    cocineras = st.number_input("N° de Cocineras", min_value=1, value=4, step=1)
-    sueldo_hora = st.number_input("Sueldo por Hora (S/)", min_value=0.0, value=5.0, step=0.5)
-    costo_agua = st.number_input("Consumo de Agua (S/)", min_value=0.0, value=10.0, step=1.0)
-    costo_lena = st.number_input("Costo de Leña/Gas (S/)", min_value=0.0, value=15.0, step=1.0)
+    key_rendimiento = f"rendimiento_{plato_seleccionado}"
+    if key_rendimiento not in st.session_state:
+        st.session_state[key_rendimiento] = RECETAS_DB[plato_seleccionado]["rendimiento_platos"]
 
-    st.subheader("🎯 Objetivos Comerciales")
-    utilidad_deseada = st.number_input("Utilidad Deseada (S/)", min_value=0.0, value=100.0, step=10.0)
-    precio_venta = st.number_input("Precio de Venta por Porción (S/)", min_value=0.1, value=6.0, step=0.5)
+    # BARRA LATERAL
+    with st.sidebar:
+        st.header("⚙️ Parámetros Fijos y Ventas")
+        st.subheader("👥 Mano de Obra y Costos Fijos")
+        horas_trabajo = st.number_input("Tiempo de Trabajo (Horas)", min_value=0.0, value=4.0, step=0.5)
+        cocineras = st.number_input("N° de Cocineras", min_value=1, value=4, step=1)
+        sueldo_hora = st.number_input("Sueldo por Hora (S/)", min_value=0.0, value=5.0, step=0.5)
+        costo_agua = st.number_input("Consumo de Agua (S/)", min_value=0.0, value=10.0, step=1.0)
+        costo_lena = st.number_input("Costo de Leña/Gas (S/)", min_value=0.0, value=15.0, step=1.0)
 
-# --- CONFIGURACIÓN DEL RENDIMIENTO DEL LOTE ---
-st.header(f"📋 Configuración de Receta: {plato_seleccionado}")
+        st.subheader("🎯 Objetivos Comerciales")
+        utilidad_deseada = st.number_input("Utilidad Deseada (S/)", min_value=0.0, value=100.0, step=10.0)
+        precio_venta = st.number_input("Precio de Venta por Porción (S/)", min_value=0.1, value=6.0, step=0.5)
 
-col_rend, _ = st.columns([1, 2])
-with col_rend:
-    platos_producidos = st.number_input(
-        "🥣 Rendimiento Real del Lote (N° de Porciones que salen):",
-        min_value=1,
-        value=int(st.session_state[key_rendimiento]),
-        step=1,
-        help="Ajusta el total de platos/porciones que produce esta olla específica."
-    )
-    st.session_state[key_rendimiento] = platos_producidos
+    st.header(f"📋 Configuración de Receta: {plato_seleccionado}")
 
-st.divider()
+    col_rend, _ = st.columns([1, 2])
+    with col_rend:
+        platos_producidos = st.number_input(
+            "🥣 Rendimiento Real del Lote (N° de Porciones):",
+            min_value=1,
+            value=int(st.session_state[key_rendimiento]),
+            step=1
+        )
+        st.session_state[key_rendimiento] = platos_producidos
 
-# --- EDICIÓN E INGRESO DINÁMICO DE INSUMOS ---
-st.subheader("⚖️ Insumos e Ingredientes Utilizados")
+    st.divider()
 
-with st.expander("➕ Añadir Insumo Nuevo a esta Olla"):
-    col_n, col_g, col_c, col_b = st.columns([2, 1, 1, 1])
-    with col_n:
-        nuevo_nombre = st.text_input("Nombre del Insumo (ej. Chuño, Pimiento):", key="nuevo_nom")
-    with col_g:
-        nuevo_g = st.number_input("Cantidad (g):", min_value=0.0, value=500.0, step=50.0, key="nuevo_g")
-    with col_c:
-        nuevo_costo = st.number_input("Costo Total Insumo (S/):", min_value=0.0, value=5.0, step=0.5, key="nuevo_costo")
-    with col_b:
-        st.write(" ")
-        st.write(" ")
-        if st.button("Guardar Insumo"):
-            if nuevo_nombre.strip():
-                import time
-                nuevo_id = f"ins_{int(time.time()*1000)}"
-                st.session_state[key_plato].append({
-                    "id": nuevo_id,
-                    "nombre": nuevo_nombre.strip(),
-                    "cantidad_g": nuevo_g,
-                    "costo_total": nuevo_costo
-                })
-                st.rerun()
+    # INSUMOS
+    st.subheader("⚖️ Insumos e Ingredientes Utilizados")
+    with st.expander("➕ Añadir Insumo Nuevo"):
+        col_n, col_g, col_c, col_b = st.columns([2, 1, 1, 1])
+        with col_n:
+            nuevo_nombre = st.text_input("Nombre del Insumo:", key="nuevo_nom")
+        with col_g:
+            nuevo_g = st.number_input("Cantidad (g):", min_value=0.0, value=500.0, step=50.0, key="nuevo_g")
+        with col_c:
+            nuevo_costo = st.number_input("Costo Total (S/):", min_value=0.0, value=5.0, step=0.5, key="nuevo_costo")
+        with col_b:
+            st.write(" ")
+            st.write(" ")
+            if st.button("Guardar Insumo"):
+                if nuevo_nombre.strip():
+                    nuevo_id = f"ins_{int(time.time()*1000)}"
+                    st.session_state[key_plato].append({
+                        "id": nuevo_id,
+                        "nombre": nuevo_nombre.strip(),
+                        "cantidad_g": nuevo_g,
+                        "costo_total": nuevo_costo
+                    })
+                    st.rerun()
 
-insumos_activos = st.session_state[key_plato]
-total_costo_insumos = 0.0
-total_gramos_insumos = 0.0
+    insumos_activos = st.session_state[key_plato]
+    total_costo_insumos = 0.0
+    eliminar_insumo_id = None
 
-eliminar_insumo_id = None
+    for idx, item in enumerate(insumos_activos):
+        item_id = item.get("id", f"ins_idx_{idx}")
+        c1, c2, c3, c4 = st.columns([3, 2, 2, 1])
+        with c1:
+            st.text_input(f"Ingrediente #{idx+1}", value=item["nombre"], key=f"nom_{item_id}", disabled=True)
+        with c2:
+            g_val = st.number_input(f"Gramos (g)", min_value=0.0, value=float(item["cantidad_g"]), step=50.0, key=f"g_{item_id}")
+            item["cantidad_g"] = g_val
+        with c3:
+            costo_val = st.number_input(f"Costo Total (S/)", min_value=0.0, value=float(item["costo_total"]), step=0.5, key=f"c_{item_id}")
+            item["costo_total"] = costo_val
+        with c4:
+            st.write(" ")
+            st.write(" ")
+            if st.button("🗑️", key=f"del_ins_{item_id}"):
+                eliminar_insumo_id = item_id
 
-for idx, item in enumerate(insumos_activos):
-    item_id = item.get("id", f"ins_idx_{idx}")
-    c1, c2, c3, c4 = st.columns([3, 2, 2, 1])
-    
-    with c1:
-        st.text_input(f"Ingrediente #{idx+1}", value=item["nombre"], key=f"nom_{item_id}", disabled=True)
-    with c2:
-        g_val = st.number_input(f"Gramos (g)", min_value=0.0, value=float(item["cantidad_g"]), step=50.0, key=f"g_{item_id}")
-        item["cantidad_g"] = g_val
-    with c3:
-        costo_val = st.number_input(f"Costo Total (S/)", min_value=0.0, value=float(item["costo_total"]), step=0.5, key=f"c_{item_id}")
-        item["costo_total"] = costo_val
-    with c4:
-        st.write(" ")
-        st.write(" ")
-        if st.button("🗑️", key=f"del_ins_{item_id}", help="Quitar este insumo"):
-            eliminar_insumo_id = item_id
+        total_costo_insumos += item["costo_total"]
 
-    total_costo_insumos += item["costo_total"]
-    total_gramos_insumos += item["cantidad_g"]
+    if eliminar_insumo_id is not None:
+        st.session_state[key_plato] = [x for x in st.session_state[key_plato] if x.get("id") != eliminar_insumo_id]
+        st.rerun()
 
-if eliminar_insumo_id is not None:
-    st.session_state[key_plato] = [x for x in st.session_state[key_plato] if x.get("id") != eliminar_insumo_id]
-    st.rerun()
+    st.divider()
 
-st.divider()
+    # UTENSILIOS
+    st.subheader("🍽️ Utensilios y otros")
+    with st.expander("➕ Añadir Utensilio u otro"):
+        col_un, col_uc, col_ub = st.columns([3, 2, 1])
+        with col_un:
+            u_nombre = st.text_input("Nombre:", key="u_nom")
+        with col_uc:
+            u_costo = st.number_input("Costo Total (S/):", min_value=0.0, value=4.0, step=0.5, key="u_costo")
+        with col_ub:
+            st.write(" ")
+            st.write(" ")
+            if st.button("Guardar Item"):
+                if u_nombre.strip():
+                    u_id = f"ut_{int(time.time()*1000)}"
+                    st.session_state[key_utensilios].append({
+                        "id": u_id,
+                        "nombre": u_nombre.strip(),
+                        "costo_total": u_costo
+                    })
+                    st.rerun()
 
-# --- SECCIÓN DE UTENSILIOS Y OTROS ---
-st.subheader("🍽️ Utensilios y otros")
+    utensilios_activos = st.session_state[key_utensilios]
+    total_costo_utensilios = 0.0
+    eliminar_utensilio_id = None
 
-with st.expander("➕ Añadir Utensilio u otro"):
-    col_un, col_uc, col_ub = st.columns([3, 2, 1])
-    with col_un:
-        u_nombre = st.text_input("Nombre:", key="u_nom")
-    with col_uc:
-        u_costo = st.number_input("Costo Total (S/):", min_value=0.0, value=4.0, step=0.5, key="u_costo")
-    with col_ub:
-        st.write(" ")
-        st.write(" ")
-        if st.button("Guardar Item"):
-            if u_nombre.strip():
-                import time
-                u_id = f"ut_{int(time.time()*1000)}"
-                st.session_state[key_utensilios].append({
-                    "id": u_id,
-                    "nombre": u_nombre.strip(),
-                    "costo_total": u_costo
-                })
-                st.rerun()
+    for idx, u_item in enumerate(utensilios_activos):
+        u_id = u_item.get("id", f"ut_idx_{idx}")
+        uc1, uc2, uc3 = st.columns([4, 3, 1])
+        with uc1:
+            st.text_input(f"Item #{idx+1}", value=u_item["nombre"], key=f"unom_{u_id}", disabled=True)
+        with uc2:
+            ucosto_val = st.number_input(f"Costo Total (S/)", min_value=0.0, value=float(u_item["costo_total"]), step=0.5, key=f"uc_{u_id}")
+            u_item["costo_total"] = ucosto_val
+        with uc3:
+            st.write(" ")
+            st.write(" ")
+            if st.button("🗑️", key=f"del_ut_{u_id}"):
+                eliminar_utensilio_id = u_id
 
-utensilios_activos = st.session_state[key_utensilios]
-total_costo_utensilios = 0.0
+        total_costo_utensilios += u_item["costo_total"]
 
-eliminar_utensilio_id = None
+    if eliminar_utensilio_id is not None:
+        st.session_state[key_utensilios] = [x for x in st.session_state[key_utensilios] if x.get("id") != eliminar_utensilio_id]
+        st.rerun()
 
-for idx, u_item in enumerate(utensilios_activos):
-    u_id = u_item.get("id", f"ut_idx_{idx}")
-    uc1, uc2, uc3 = st.columns([4, 3, 1])
-    
-    with uc1:
-        st.text_input(f"Item #{idx+1}", value=u_item["nombre"], key=f"unom_{u_id}", disabled=True)
-    with uc2:
-        ucosto_val = st.number_input(f"Costo Total (S/)", min_value=0.0, value=float(u_item["costo_total"]), step=0.5, key=f"uc_{u_id}")
-        u_item["costo_total"] = ucosto_val
-    with uc3:
-        st.write(" ")
-        st.write(" ")
-        if st.button("🗑️", key=f"del_ut_{u_id}", help="Quitar este item"):
-            eliminar_utensilio_id = u_id
+    # CÁLCULOS
+    costo_variable_total = total_costo_insumos + total_costo_utensilios
+    cvu = costo_variable_total / platos_producidos if platos_producidos > 0 else 0.0
+    costos_fijos = (horas_trabajo * cocineras * sueldo_hora) + costo_agua + costo_lena
+    margen_ganancia = precio_venta - cvu
 
-    total_costo_utensilios += u_item["costo_total"]
-
-if eliminar_utensilio_id is not None:
-    st.session_state[key_utensilios] = [x for x in st.session_state[key_utensilios] if x.get("id") != eliminar_utensilio_id]
-    st.rerun()
-
-# --- CÁLCULOS CONTABLES AUTOMÁTICOS ---
-costo_variable_total = total_costo_insumos + total_costo_utensilios
-cvu = costo_variable_total / platos_producidos if platos_producidos > 0 else 0.0
-costos_fijos = (horas_trabajo * cocineras * sueldo_hora) + costo_agua + costo_lena
-margen_ganancia = precio_venta - cvu
-
-if margen_ganancia > 0:
-    pe_unidades = math.ceil((costos_fijos + utilidad_deseada) / margen_ganancia)
-    pe_soles = pe_unidades * precio_venta
-else:
-    pe_unidades = "MARGEN NEGATIVO"
-    pe_soles = 0.0
-
-# --- PANEL DE RESULTADOS ---
-st.divider()
-st.header("📊 Resultados Contables en Tiempo Real")
-
-m1, m2, m3, m4 = st.columns(4)
-m1.metric("Costo Var. Total (Insumos + Utensilios y otros)", f"S/ {costo_variable_total:.2f}")
-m2.metric("Rendimiento del Lote", f"{platos_producidos} porciones")
-m3.metric("Costo Var. Unitario (CVu)", f"S/ {cvu:.2f}")
-m4.metric("Costos Fijos Totales (CF)", f"S/ {costos_fijos:.2f}")
-
-st.subheader("🎯 Punto de Equilibrio y Recaudación Meta")
-res1, res2 = st.columns(2)
-
-with res1:
-    if isinstance(pe_unidades, int):
-        st.success(f"### **{pe_unidades} porciones** a vender")
+    if margen_ganancia > 0:
+        pe_unidades = math.ceil((costos_fijos + utilidad_deseada) / margen_ganancia)
+        pe_soles = pe_unidades * precio_venta
     else:
-        st.error("### **Aumentar precio de venta** (Margen insuficiente)")
+        pe_unidades = "MARGEN NEGATIVO"
+        pe_soles = 0.0
 
-with res2:
-    if isinstance(pe_unidades, int):
-        st.info(f"### **S/ {pe_soles:.2f}** meta de ingresos")
+    # RESULTADOS
+    st.divider()
+    st.header("📊 Resultados Contables en Tiempo Real")
+
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Costo Var. Total", f"S/ {costo_variable_total:.2f}")
+    m2.metric("Rendimiento del Lote", f"{platos_producidos} porciones")
+    m3.metric("Costo Var. Unitario (CVu)", f"S/ {cvu:.2f}")
+    m4.metric("Costos Fijos Totales (CF)", f"S/ {costos_fijos:.2f}")
+
+    st.subheader("🎯 Punto de Equilibrio y Recaudación Meta")
+    res1, res2 = st.columns(2)
+
+    with res1:
+        if isinstance(pe_unidades, int):
+            st.success(f"### **{pe_unidades} porciones** a vender")
+        else:
+            st.error("### **Aumentar precio de venta** (Margen insuficiente)")
+
+    with res2:
+        if isinstance(pe_unidades, int):
+            st.info(f"### **S/ {pe_soles:.2f}** meta de ingresos")
+        else:
+            st.warning("### **S/ 0.00**")
+
+    # BOTÓN GUARDAR
+    st.divider()
+    st.subheader("💾 Guardar esta Configuración en el Historial")
+    col_reg_nom, col_reg_btn = st.columns([3, 1])
+    with col_reg_nom:
+        nombre_registro = st.text_input("Nombre para identificar este guardado (ej: Yuca Rellena - Olla 1):", key="nom_guardado")
+    with col_reg_btn:
+        st.write(" ")
+        st.write(" ")
+        if st.button("💾 Guardar en Registro"):
+            if nombre_registro.strip():
+                datos_guardar = {
+                    "plato": plato_seleccionado,
+                    "nombre_registro": nombre_registro.strip(),
+                    "fecha": time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "platos_producidos": platos_producidos,
+                    "horas_trabajo": horas_trabajo,
+                    "cocineras": cocineras,
+                    "sueldo_hora": sueldo_hora,
+                    "costo_agua": costo_agua,
+                    "costo_lena": costo_lena,
+                    "utilidad_deseada": utilidad_deseada,
+                    "precio_venta": precio_venta,
+                    "insumos": insumos_activos,
+                    "utensilios": utensilios_activos,
+                    "resultados": {
+                        "costo_variable_total": costo_variable_total,
+                        "cvu": cvu,
+                        "costos_fijos": costos_fijos,
+                        "pe_unidades": pe_unidades,
+                        "pe_soles": pe_soles
+                    }
+                }
+                filename = f"{CARPETA_REGISTROS}/{int(time.time())}_{plato_seleccionado}.json"
+                with open(filename, "w", encoding="utf-8") as f:
+                    json.dump(datos_guardar, f, ensure_ascii=False, indent=4)
+                st.success(f"✅ ¡Registro '{nombre_registro}' guardado!")
+            else:
+                st.warning("Escribe un nombre para guardar.")
+
+elif modo_app == "📁 Ver Registros Guardados (Lectura)":
+    st.header("📂 Historial de Registros Guardados")
+    
+    archivos = [f for f in os.listdir(CARPETA_REGISTROS) if f.endswith(".json")]
+    
+    if not archivos:
+        st.info("No hay ninguna configuración guardada en el historial.")
     else:
-        st.warning("### **S/ 0.00**")
+        opciones_registros = {}
+        for archivo in archivos:
+            filepath = os.path.join(CARPETA_REGISTROS, archivo)
+            with open(filepath, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                nombre_display = f"{data.get('nombre_registro', 'Sin Nombre')} | {data.get('plato')} ({data.get('fecha')})"
+                opciones_registros[nombre_display] = (archivo, data)
+
+        col_sel, col_del = st.columns([4, 1])
+        
+        with col_sel:
+            reg_seleccionado = st.selectbox("🔍 Selecciona un registro para ver sus datos:", options=list(opciones_registros.keys()))
+        
+        if reg_seleccionado:
+            archivo_actual, reg = opciones_registros[reg_seleccionado]
+            
+            with col_del:
+                st.write(" ")
+                st.write(" ")
+                if st.button("🗑️ Eliminar Registro", help="Borrar este registro permanentemente"):
+                    filepath_borrar = os.path.join(CARPETA_REGISTROS, archivo_actual)
+                    if os.path.exists(filepath_borrar):
+                        os.remove(filepath_borrar)
+                        st.success("¡Registro eliminado con éxito!")
+                        st.rerun()
+
+            st.divider()
+            st.subheader(f"📄 Reporte Guardado: {reg['nombre_registro']}")
+            st.caption(f"Plato: **{reg['plato']}** | Fecha: **{reg['fecha']}**")
+
+            # Muestra de Resultados (Solo Lectura)
+            st.subheader("📊 Resultados de la Configuración Guardada")
+            res = reg["resultados"]
+            c1, c2, c3, c4 = st.columns(4)
+            c1.metric("Costo Var. Total", f"S/ {res['costo_variable_total']:.2f}")
+            c2.metric("Rendimiento Lote", f"{reg['platos_producidos']} porciones")
+            c3.metric("CVu", f"S/ {res['cvu']:.2f}")
+            c4.metric("Costos Fijos", f"S/ {res['costos_fijos']:.2f}")
+
+            r1, r2 = st.columns(2)
+            r1.info(f"**Punto Equilibrio (Porciones a vender):** {res['pe_unidades']}")
+            r2.info(f"**Punto Equilibrio (Recaudación Meta):** S/ {res['pe_soles']:.2f}")
+
+            st.divider()
+            st.subheader("🛒 Ingredientes Guardados")
+            st.dataframe(reg["insumos"], use_container_width=True)
+
+            st.subheader("🍽️ Utensilios Guardados")
+            st.dataframe(reg["utensilios"], use_container_width=True)
+
+            st.subheader("⚙️ Parámetros Fijos Registrados")
+            st.json({
+                "Precio de Venta Unitario": f"S/ {reg['precio_venta']}",
+                "Utilidad Deseada Meta": f"S/ {reg['utilidad_deseada']}",
+                "Costo Mano de Obra": f"{reg['cocineras']} cocineras x {reg['horas_trabajo']} hrs a S/ {reg['sueldo_hora']}/hr",
+                "Consumo Agua": f"S/ {reg['costo_agua']}",
+                "Consumo Leña/Gas": f"S/ {reg['costo_lena']}"
+            })
