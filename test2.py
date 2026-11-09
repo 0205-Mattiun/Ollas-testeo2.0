@@ -108,6 +108,28 @@ with st.sidebar:
                 else:
                     st.error("Debes marcar la casilla 'Sí, estoy seguro' para poder eliminar.")
 
+    # --- SECCIÓN DE RESPALDO Y CARGA DE REGISTROS ---
+    st.divider()
+    st.header("💾 Respaldo Anti-Suspensión")
+    
+    # Cargar respaldo en JSON
+    archivo_subido = st.file_uploader("📤 Cargar Respaldo (.json)", type=["json"])
+    if archivo_subido is not None:
+        try:
+            contenido = json.load(archivo_subido)
+            nombre_olla_respaldo = contenido.get("olla", "Olla_Restaurada")
+            ruta_restaurar = os.path.join(CARPETA_BASE, nombre_olla_respaldo)
+            if not os.path.exists(ruta_restaurar):
+                os.makedirs(ruta_restaurar)
+            
+            filename = f"{ruta_restaurar}/{int(time.time())}_{contenido.get('plato', 'Receta')}.json"
+            with open(filename, "w", encoding="utf-8") as f:
+                json.dump(contenido, f, ensure_ascii=False, indent=4)
+            st.success("✅ ¡Registro restaurado con éxito!")
+            st.rerun()
+        except Exception as e:
+            st.error("Error al procesar el archivo de respaldo.")
+
 # Ruta de almacenamiento activa para la Olla seleccionada
 CARPETA_OLLA = os.path.join(CARPETA_BASE, nombre_olla_clean)
 if not os.path.exists(CARPETA_OLLA):
@@ -297,7 +319,7 @@ if modo_app == "✏️ Crear Nueva Configuración":
         else:
             st.warning("### **S/ 0.00**")
 
-    # BOTÓN GUARDAR
+    # BOTÓN GUARDAR Y DESCARGAR
     st.divider()
     st.subheader(f"💾 Guardar Registro en: {nombre_olla_clean.replace('_', ' ')}")
     col_reg_nom, col_reg_btn = st.columns([3, 1])
@@ -334,9 +356,21 @@ if modo_app == "✏️ Crear Nueva Configuración":
                 filename = f"{CARPETA_OLLA}/{int(time.time())}_{plato_seleccionado}.json"
                 with open(filename, "w", encoding="utf-8") as f:
                     json.dump(datos_guardar, f, ensure_ascii=False, indent=4)
+                
+                st.session_state["ultimo_guardado"] = datos_guardar
                 st.success(f"✅ ¡Registro '{nombre_registro}' guardado dentro de {nombre_olla_clean.replace('_', ' ')}!")
             else:
                 st.warning("Escribe un nombre para guardar.")
+
+    if "ultimo_guardado" in st.session_state:
+        json_str = json.dumps(st.session_state["ultimo_guardado"], ensure_ascii=False, indent=4)
+        st.download_button(
+            label="📥 Descargar copia de seguridad (.json)",
+            data=json_str,
+            file_name=f"Respaldo_{st.session_state['ultimo_guardado']['nombre_registro']}.json",
+            mime="application/json",
+            help="Descarga este archivo a tu PC/celular para restaurarlo si la página se reinicia."
+        )
 
 elif modo_app == "📁 Ver Registros Guardados (Lectura)":
     st.header(f"📂 Historial de Registros de: {nombre_olla_clean.replace('_', ' ')}")
@@ -406,3 +440,12 @@ elif modo_app == "📁 Ver Registros Guardados (Lectura)":
                 "Consumo Agua": f"S/ {reg['costo_agua']}",
                 "Consumo Leña/Gas": f"S/ {reg['costo_lena']}"
             })
+
+            # Botón de descarga directa desde la vista de lectura
+            json_lectura = json.dumps(reg, ensure_ascii=False, indent=4)
+            st.download_button(
+                label="📥 Descargar este registro (.json)",
+                data=json_lectura,
+                file_name=f"Registro_{reg['nombre_registro']}.json",
+                mime="application/json"
+            )
